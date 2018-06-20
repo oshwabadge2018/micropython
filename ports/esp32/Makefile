@@ -64,6 +64,7 @@ INC += -I../../../lvgl/lv_misc
 INC += -I../../../lvgl/lv_objx
 INC += -I../../../lvgl/lv_themes
 INC += -I../../../lvgl/lv_misc/lv_fonts
+INC += -I../../../badge
 
 INC_ESPCOMP += -I$(ESPCOMP)/bootloader_support/include
 INC_ESPCOMP += -I$(ESPCOMP)/driver/include
@@ -180,7 +181,7 @@ SRC_C = \
 	machine_wdt.c \
 	mpthreadport.c \
 	machine_rtc.c \
-	badge/badge.c \
+	../../../badge/badge.c \
 	$(SRC_MOD) \
 	../../../lvgl/lv_core/lv_group.c \
 	../../../lvgl/lv_core/lv_indev.c \
