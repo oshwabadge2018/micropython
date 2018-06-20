@@ -173,7 +173,7 @@ SRC_C = \
 	machine_wdt.c \
 	mpthreadport.c \
 	machine_rtc.c \
-	ohs2018-badge-upython-module/badge.c \
+	badge/badge.c \
 	$(SRC_MOD)
 
 EXTMOD_SRC_C = $(addprefix extmod/,\
