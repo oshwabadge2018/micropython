@@ -65,6 +65,7 @@ INC += -I../../../lvgl/lv_objx
 INC += -I../../../lvgl/lv_themes
 INC += -I../../../lvgl/lv_misc/lv_fonts
 INC += -I../../../badge
+INC += -I../../../lvgl-epd
 
 INC_ESPCOMP += -I$(ESPCOMP)/bootloader_support/include
 INC_ESPCOMP += -I$(ESPCOMP)/driver/include
@@ -253,7 +254,8 @@ SRC_C = \
 	../../../lvgl/lv_themes/lv_theme_night.c \
 	../../../lvgl/lv_themes/lv_theme_templ.c \
 	../../../lvgl/lv_themes/lv_theme_zen.c \
-	../../../lvgl/lv_themes/lv_theme_material.c
+	../../../lvgl/lv_themes/lv_theme_material.c \
+	../../../lvgl-epd/lv_epd.c
 
 EXTMOD_SRC_C = $(addprefix extmod/,\
 	modonewire.c \
