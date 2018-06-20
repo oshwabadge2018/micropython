@@ -35,7 +35,7 @@ __pycache__/
 *.pyc
 
 # module symlink
-ports/esp32/badge/
+ports/esp32/badge
 
 # Customized Makefile/project overrides
 ######################
