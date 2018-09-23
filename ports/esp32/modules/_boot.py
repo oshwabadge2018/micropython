@@ -1,5 +1,6 @@
 import gc
 import uos
+import ohsbadge
 from flashbdev import bdev
 
 try:
@@ -10,3 +11,4 @@ except OSError:
     vfs = inisetup.setup()
 
 gc.collect()
+ohsbadge.start()
