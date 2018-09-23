@@ -1,5 +1,6 @@
 from machine import Pin
 import gxgde0213b1
+import G_FreeSans24pt7b
 import font12
 import font16
 import font20
@@ -120,8 +121,10 @@ def start_web_server():
 
 def start():
 	#draw the screen TODO: make this dynamic based on the contents of file
-	epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 24, "TODO: Draw logo :P", font16, gxgde0213b1.COLORED)
+	epd.G_display_string_at(fb,0,0,"OHS 2018",G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
+	#epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
+	#epd.display_string_at(fb, 0, 24, "TODO: Draw logo :P", font16, gxgde0213b1.COLORED)
+	#epd.draw_custom_font_char(fb,50,50,1,'A'[0],G_FreeSans24pt7b,gxgde0213b1.COLORED)
 	epd.display_frame(fb)
 
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
