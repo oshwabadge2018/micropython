@@ -1,3 +1,7 @@
+first_char = 0x20
+last_char = 0x7e
+y_advance = 56
+
 Glyphs = [
   [     0,   0,   0,  12,    0,    1 ],   # 0x20 ' '
   [     0,   4,  34,  16,    6,  -33 ],   # 0x21 '!'
