@@ -30,6 +30,9 @@ class EPD:
         self.height = EPD_HEIGHT
         self.rotate = ROTATE_0
 
+    def __del__(self):
+        self.spi.deinit()
+
     def free(self):
         self.spi.deinit()
 

@@ -8,6 +8,7 @@ import network
 import ubinascii
 import urandom
 import machine
+import time
 from microWebSrv import MicroWebSrv
 
 #initialize the epaper
@@ -102,11 +103,20 @@ def _httpHandlerTestPost(httpClient, httpResponse) :
 	goto_deepsleep()
 
 def goto_deepsleep():
-	#go to deepsleep wait for user to press the send button
-	button = machine.TouchPad(machine.Pin(33))
-	reading = button.read()
-	button.config(int(2/3 * reading))
-	button.callback(lambda t:print("Pressed"))
+	#go to deepsleep wait for user to press one of the buttons
+	button1 = machine.TouchPad(machine.Pin(33))
+	time.sleep_ms(100)
+	reading = button1.read()
+	button1.config(int(2/3 * reading))
+	button1.callback(lambda t:print("Pressed 33"))
+
+	button2 = machine.TouchPad(machine.Pin(32))
+	time.sleep_ms(100)
+	reading = button1.read()
+	reading = button2.read()
+	button2.config(int(2/3 * reading))
+	button2.callback(lambda t:print("Pressed 32"))
+
 	machine.deepsleep()
 
 def start_web_server():
@@ -118,15 +128,22 @@ def start_web_server():
 
 def start():
 	#draw the screen TODO: make this dynamic based on the contents of file
+	epd.clear_frame(fb)
 	epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 24, "TODO: Draw logo :P", font16, gxgde0213b1.COLORED)
 	epd.display_frame(fb)
 
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
-		#go into AP mode
-		#TODO add support for detecting which button cause the wakeup
-		start_ap_mode()
-		start_web_server()
+		if machine.TouchPad.wake_reason() == 9:
+			#go into AP mode
+			#TODO add support for detecting which button cause the wakeup
+			start_ap_mode()
+			start_web_server()
+		else:
+			epd.clear_frame(fb)
+			epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
+			epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font16, gxgde0213b1.COLORED)
+			epd.display_frame(fb)
 	else:
 		goto_deepsleep()
 

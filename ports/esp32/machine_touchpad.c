@@ -129,11 +129,17 @@ STATIC mp_obj_t mtp_callback(mp_obj_t self_in, mp_obj_t callback) {
 }
 MP_DEFINE_CONST_FUN_OBJ_2(mtp_callback_obj, mtp_callback);
 
+STATIC mp_obj_t mtp_wake_reason(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    return MP_OBJ_NEW_SMALL_INT(esp_sleep_get_touchpad_wakeup_status());
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mtp_wake_reason_obj, 0,  mtp_wake_reason);
+
 STATIC const mp_rom_map_elem_t mtp_locals_dict_table[] = {
     // instance methods
     { MP_ROM_QSTR(MP_QSTR_config), MP_ROM_PTR(&mtp_config_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&mtp_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_callback), MP_ROM_PTR(&mtp_callback_obj) },
+    { MP_ROM_QSTR(MP_QSTR_wake_reason), MP_ROM_PTR(&mtp_wake_reason_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(mtp_locals_dict, mtp_locals_dict_table);
