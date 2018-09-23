@@ -34,7 +34,9 @@ def start_ap_mode():
 	ap.config(authmode=3, password=password)
 	ipaddr = ap.ifconfig()[0]
 
+  
 	epd.clear_frame(fb)
+	epd.set_rotate(gxgde0213b1.ROTATE_270)
 	epd.display_string_at(fb, 0, 0, "Welcome to OHS 2018!", font16, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 20, "ESSID = " + essid, font12, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 32, "PASSWORD = " + password, font12, gxgde0213b1.COLORED)
