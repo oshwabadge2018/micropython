@@ -251,7 +251,6 @@ class EPD:
 		#font.first_char
 		#font.last_Char
 		#font.y_advance
-
 		
 		char  = ord(char) - font.first_char
 		bo    = font.Glyphs[char][glyph_bitmap_ofset]
@@ -268,8 +267,8 @@ class EPD:
 		yo16  = 0
 
 		if size > 1:
-			xo16 = xo
-			yo16 = yo
+			xo16 = int(xo)
+			yo16 = int(yo)
 
 		# copy glyph to screen
 		yy = 0
@@ -277,7 +276,7 @@ class EPD:
 			xx = 0
 			while (xx<w):
 				#
-				if (bit%8 == 0):
+				if (bit&0x07 == 0):
 					bits = font.Bitmaps[bo]
 					bo += 1
 				if (bits&0x80 == 0x80):
@@ -286,7 +285,7 @@ class EPD:
 					else:
 						xp = x + (xo16 + xx) * size
 						yp = y + (yo16 + yy) * size
-						self.draw_filled_rectangle(frame_buffer,xp,yp,size, size, color)
+						self.draw_filled_rectangle(frame_buffer,xp,yp,xp+size, yp+size, color)
 				bit += 1
 				bits = bits<<1
 				xx += 1
@@ -303,7 +302,7 @@ class EPD:
 		glyph_xOffset = 4
 		glyph_yOffset = 5
 		cursor_x = x
-		cursor_y = size * font.y_advance
+		cursor_y = y + (size * font.y_advance)
 		
 		for c in string:
 			if c == '\n':
@@ -317,7 +316,6 @@ class EPD:
 					xo    = font.Glyphs[char][glyph_xOffset]
 					yo    = font.Glyphs[char][glyph_yOffset]
 					xa    = font.Glyphs[char][glyph_xAdvance]
-					print("X off: %d"%xo)  
 					self.draw_custom_font_char(frame_buffer,cursor_x,cursor_y,size,c,font,color)
 					cursor_x += xa * size
 	
