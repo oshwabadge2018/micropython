@@ -30,6 +30,9 @@ class EPD:
 		self.height = EPD_HEIGHT
 		self.rotate = ROTATE_0
 
+	def __del__(self):
+		self.spi.deinit()
+
 	def free(self):
 		self.spi.deinit()
 
@@ -274,10 +277,9 @@ class EPD:
 			xx = 0
 			while (xx<w):
 				#
-				bit += 1
 				if (bit%8 == 0):
-					bo += 1
 					bits = font.Bitmaps[bo]
+					bo += 1
 				if (bits&0x80 == 0x80):
 					if size==1:
 						self.set_pixel(frame_buffer,x+xo+xx,y+yo+yy,color)
@@ -285,6 +287,7 @@ class EPD:
 						xp = x + (xo16 + xx) * size
 						yp = y + (yo16 + yy) * size
 						self.draw_filled_rectangle(frame_buffer,xp,yp,size, size, color)
+				bit += 1
 				bits = bits<<1
 				xx += 1
 			yy += 1
