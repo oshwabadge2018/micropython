@@ -126,6 +126,7 @@ soft_reset:
 
     mp_deinit();
     fflush(stdout);
+    esp_restart();
     goto soft_reset;
 }
 
