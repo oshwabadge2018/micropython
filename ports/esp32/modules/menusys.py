@@ -11,9 +11,9 @@ import machine
 import time
 import os
 import imagedata
+from machine import Pin, TouchPad
 from ohsbadge import epd
 from ohsbadge import fb
-from machine import Pin, TouchPad
 
 class Menu:
 	menuitems = []
@@ -42,7 +42,7 @@ class Menu:
 		elif key == "launch":
 			if f != None:
 				print("Launching %s"%f)
-				f()
+				f(self.cur_opt['text'])
 			else:
 				print("Could not launch '%s' no function attatched!"%self.cur_opt['text'])
 
@@ -75,6 +75,7 @@ class Menu:
 
 	def menuloop(self,up,down,left,right,run,exit):
 		m = self
+		m.drawMenu()
 		while True:
 			if up.read()<400:
 				m.handleKey("up")

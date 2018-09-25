@@ -12,7 +12,10 @@ import machine
 import time
 import os
 import imagedata
+
+import machine
 from microWebSrv import MicroWebSrv
+from machine import Pin, TouchPad
 
 #initialize the epaper
 reset = Pin(16, Pin.OUT)
@@ -116,13 +119,19 @@ def goto_deepsleep():
 	button1.config(int(2/3 * reading))
 	button1.callback(lambda t:print("Pressed 33"))
 
-	button2 = machine.TouchPad(machine.Pin(32))
+	button2 = machine.TouchPad(machine.Pin(12))
 	time.sleep_ms(100)
-	reading = button1.read()
 	reading = button2.read()
 	button2.config(int(2/3 * reading))
-	button2.callback(lambda t:print("Pressed 32"))
+	button2.callback(lambda t:print("Pressed 12"))
 
+	button3 = machine.TouchPad(machine.Pin(32))
+	time.sleep_ms(100)
+	reading = button3.read()
+	button3.config(int(2/3 * reading))
+	button3.callback(lambda t:print("Pressed 32"))
+	print("Sleepytime.. zz")
+	time.sleep(1)
 	machine.deepsleep()
 
 def start_web_server():
@@ -147,11 +156,25 @@ def start():
 		epd.display_frame(imagedata.ohslogo)
 
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
+		print(machine.TouchPad.wake_reason())
 		if machine.TouchPad.wake_reason() == 9:
 			#go into AP mode
 			#TODO add support for detecting which button cause the wakeup
 			start_ap_mode()
 			start_web_server()
+		if machine.TouchPad.wake_reason() == 8:
+			m = buildMenu()
+
+			app = TouchPad(Pin(32))
+			card = TouchPad(Pin(33))
+			right = TouchPad(Pin(13))
+			left = TouchPad(Pin(14))
+			down = TouchPad(Pin(27))
+			up = TouchPad(Pin(12))
+
+			m.menuloop(up,down,left,right,app,card)
+			machine.restart()
+
 		else:
 			epd.clear_frame(fb)
  			epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
@@ -159,6 +182,31 @@ def start():
  			epd.display_frame(fb)
 	else:
 		goto_deepsleep()
+
+def buildMenu():
+	import menusys as menu
+	epd.set_rotate(gxgde0213b1.ROTATE_270)
+	m = menu.Menu("Available Applications")
+	print(m)
+
+	#does apps dir exist
+	if not 'apps' in os.listdir():
+		print("Apps Dir is missing, Populating new one")
+		os.mkdir('apps')
+	else:
+		for a in os.listdir('apps'):
+			m.addItem(a,execapp)
+			print("Adding App '%s'"%a)
+	print(m)
+	return m
+
+def execapp(f):
+	f = "/apps/"+f
+	print("Running '%s'"%f)
+	try:
+		exec(open(f).read())
+	except:
+		pass			
 
 def writeName(first,last,socialmedia='',email=''):
 	try:
