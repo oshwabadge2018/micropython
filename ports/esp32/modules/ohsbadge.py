@@ -105,6 +105,7 @@ def _httpHandlerTestPost(httpClient, httpResponse) :
 								  content 		 = content )
 	writeName(firstname,lastname)
 
+	epd.set_rotate(gxgde0213b1.ROTATE_90)
 	namestr=firstname+"\n"+lastname
 	epd.clear_frame(fb)
 	epd.G_display_string_at(fb,0,0,namestr,G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
@@ -142,19 +143,6 @@ def start_web_server():
 	srv.Start(threaded=False)
 
 def start():
-
-
-	try:
-		import d_name
-		print("Printing Name")
-		namestr=d_name.first+"\n"+d_name.last
-		epd.clear_frame(fb)
-		epd.G_display_string_at(fb,0,0,namestr,G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
-		epd.display_frame(fb)
-	except:
-		print("No Name, Showing Logo")
-		epd.display_frame(imagedata.ohslogo)
-
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
 		print(machine.TouchPad.wake_reason())
 		if machine.TouchPad.wake_reason() == 9:
@@ -181,6 +169,16 @@ def start():
  			epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font16, gxgde0213b1.COLORED)
  			epd.display_frame(fb)
 	else:
+		try:
+			import d_name
+			print("Printing Name")
+			namestr=d_name.first+"\n"+d_name.last
+			epd.clear_frame(fb)
+			epd.G_display_string_at(fb,0,0,namestr,G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
+			epd.display_frame(fb)
+		except:
+			print("No Name, Showing Logo")
+			epd.display_frame(imagedata.ohslogo)
 		goto_deepsleep()
 
 def buildMenu():
