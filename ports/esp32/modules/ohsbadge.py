@@ -10,6 +10,8 @@ import ubinascii
 import urandom
 import machine
 import time
+import os
+import imagedata
 from microWebSrv import MicroWebSrv
 
 #initialize the epaper
@@ -98,11 +100,12 @@ def _httpHandlerTestPost(httpClient, httpResponse) :
 								  contentType	 = "text/html",
 								  contentCharset = "UTF-8",
 								  content 		 = content )
+	writeName(firstname,lastname)
+
+	namestr=firstname+"\n"+lastname
 	epd.clear_frame(fb)
-	epd.display_string_at(fb, 0, 0, firstname, font24, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 24, lastname, font24, gxgde0213b1.COLORED)
+	epd.G_display_string_at(fb,0,0,namestr,G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
 	epd.display_frame(fb)
-	#TODO save output to a file to be loaded on next boot
 	goto_deepsleep()
 
 def goto_deepsleep():
@@ -130,12 +133,18 @@ def start_web_server():
 	srv.Start(threaded=False)
 
 def start():
-	#draw the screen TODO: make this dynamic based on the contents of file
-	epd.G_display_string_at(fb,0,0,"OHS 2018",G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
-	#epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
-	#epd.display_string_at(fb, 0, 24, "TODO: Draw logo :P", font16, gxgde0213b1.COLORED)
-	#epd.draw_custom_font_char(fb,50,50,1,'A'[0],G_FreeSans24pt7b,gxgde0213b1.COLORED)
-	epd.display_frame(fb)
+
+
+	try:
+		import d_name
+		print("Printing Name")
+		namestr=d_name.first+"\n"+d_name.last
+		epd.clear_frame(fb)
+		epd.G_display_string_at(fb,0,0,namestr,G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
+		epd.display_frame(fb)
+	except:
+		print("No Name, Showing Logo")
+		epd.display_frame(imagedata.ohslogo)
 
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
 		if machine.TouchPad.wake_reason() == 9:
@@ -145,9 +154,19 @@ def start():
 			start_web_server()
 		else:
 			epd.clear_frame(fb)
-			epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
-			epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font16, gxgde0213b1.COLORED)
-			epd.display_frame(fb)
+ 			epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
+ 			epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font16, gxgde0213b1.COLORED)
+ 			epd.display_frame(fb)
 	else:
 		goto_deepsleep()
 
+def writeName(first,last,socialmedia='',email=''):
+	try:
+		fh = open("d_name.py","w")
+		fh.write("first='%s'\n"%first)
+		fh.write("last='%s'\n"%last)
+		fh.write("socialmedia='%s'\n"%socialmedia)
+		fh.write("email='%s'\n"%email)
+		fh.close()
+	except:
+		print("Could not Write personal info")
