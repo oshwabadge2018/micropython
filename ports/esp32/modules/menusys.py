@@ -13,6 +13,7 @@ import os
 import imagedata
 from ohsbadge import epd
 from ohsbadge import fb
+from machine import Pin, TouchPad
 
 class Menu:
 	menuitems = []
@@ -71,6 +72,40 @@ class Menu:
 				ypos = 20
 				xpos += xdelta
 		epd.display_frame(fb)
+
+	def menuloop(self,up,down,left,right,run,exit):
+		m = self
+		while True:
+			if up.read()<400:
+				m.handleKey("up")
+				while up.read()<400:
+					pass
+				m.drawMenu()
+			if down.read()<400:
+				m.handleKey("down")
+				while down.read()<400:
+					pass
+				m.drawMenu()
+			if left.read()<400:
+				m.handleKey("left")
+				while left.read()<400:
+					pass
+				m.drawMenu()
+			if right.read()<400:
+				m.handleKey("right")
+				while right.read()<400:
+					pass
+				m.drawMenu()
+			if run.read()<400:
+				m.handleKey("launch")
+				while run.read()<400:
+					pass
+				m.drawMenu()
+			if exit.read()<400:
+				m.handleKey("right")
+				while exit.read()<400:
+					pass
+				return
 		
 		
 			
