@@ -17,6 +17,9 @@ import machine
 from microWebSrv import MicroWebSrv
 from machine import Pin, TouchPad
 
+ipaddress = None
+wifipass = None
+
 #initialize the epaper
 reset = Pin(16, Pin.OUT)
 dc = Pin(25, Pin.OUT)
@@ -32,26 +35,41 @@ epd.clear_frame(fb)
 epd.set_rotate(gxgde0213b1.ROTATE_90)
 
 def start_ap_mode():
+	global ipaddress
 	ap = network.WLAN(network.AP_IF)
 	ap.active(True)
 
 	essid = 'ohsbadge-' + ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
-	password = str(urandom.getrandbits(30))
+	global wifipass
+	if wifipass == None:
+		wifipass = str(urandom.getrandbits(30))
 	ap.config(essid=essid)
-	ap.config(authmode=3, password=password)
+	ap.config(authmode=3, password=wifipass)
 	ipaddr = ap.ifconfig()[0]
-
+	#set global var.
+	ipaddress = ipaddr
   
 	epd.clear_frame(fb)
 	epd.set_rotate(gxgde0213b1.ROTATE_270)
 	epd.display_string_at(fb, 0, 0, "Welcome to OHS 2018!", font16, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 20, "ESSID = " + essid, font12, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 32, "PASSWORD = " + password, font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 32, "PASSWORD = " + wifipass, font12, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 44, "IP ADDR = " + ipaddr, font12, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 60, "Connect to badge AP to configure." , font12, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 72, "Enter this URL in your browser:" , font12, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 84, "http://" + ipaddr + "/setup", font12, gxgde0213b1.COLORED)
+
 	epd.display_frame(fb)
+
+def start_ftp_server_app(f):
+	start_ap_mode()
+	startFTPServer()
+	wait_for_button(TouchPad(Pin(32)))
+
+def startFTPServer():
+	global ipaddress
+	epd.display_string_at(fb, 0, 84, "FTP Server at" + ipaddress , font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 96, "No Username or Password" , font12, gxgde0213b1.COLORED)
+	epd.display_frame(fb)
+	import uftpd
+	
 
 @MicroWebSrv.route('/setup')
 def _httpHandlerTestGet(httpClient, httpResponse) :
@@ -114,17 +132,17 @@ def _httpHandlerTestPost(httpClient, httpResponse) :
 
 def goto_deepsleep():
 	#go to deepsleep wait for user to press one of the buttons
-	button1 = machine.TouchPad(machine.Pin(33))
-	time.sleep_ms(100)
-	reading = button1.read()
-	button1.config(int(2/3 * reading))
-	button1.callback(lambda t:print("Pressed 33"))
+	#button1 = machine.TouchPad(machine.Pin(33))
+	#time.sleep_ms(100)
+	#reading = button1.read()
+	#button1.config(int(2/3 * reading))
+	#button1.callback(lambda t:print("Pressed 33"))
 
-	button2 = machine.TouchPad(machine.Pin(12))
-	time.sleep_ms(100)
-	reading = button2.read()
-	button2.config(int(2/3 * reading))
-	button2.callback(lambda t:print("Pressed 12"))
+	#button2 = machine.TouchPad(machine.Pin(12))
+	#time.sleep_ms(100)
+	#reading = button2.read()
+	#button2.config(int(2/3 * reading))
+	#button2.callback(lambda t:print("Pressed 12"))
 
 	button3 = machine.TouchPad(machine.Pin(32))
 	time.sleep_ms(100)
@@ -135,7 +153,18 @@ def goto_deepsleep():
 	time.sleep(1)
 	machine.deepsleep()
 
+def start_web_server_app(f):
+	start_ap_mode()
+	start_web_server()
+	wait_for_button(TouchPad(Pin(32)))
+	
+
 def start_web_server():
+	global ipaddress
+	epd.display_string_at(fb, 0, 60, "Connect to badge AP to configure." , font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 72, "Enter this URL in your browser:" , font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 84, "http://" + ipaddress + "/setup", font12, gxgde0213b1.COLORED)
+	epd.display_frame(fb)
 	srv = MicroWebSrv(webPath='www/')
 	srv.MaxWebSocketRecvLen     = 256
 	srv.WebSocketThreaded		= False
@@ -145,11 +174,11 @@ def start_web_server():
 def start():
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
 		print(machine.TouchPad.wake_reason())
-		if machine.TouchPad.wake_reason() == 9:
-			#go into AP mode
-			#TODO add support for detecting which button cause the wakeup
-			start_ap_mode()
-			start_web_server()
+		#if machine.TouchPad.wake_reason() == 9:
+		#	#go into AP mode
+		#	#TODO add support for detecting which button cause the wakeup
+		#	start_ap_mode()
+		#	start_web_server()
 		if machine.TouchPad.wake_reason() == 8:
 			m = buildMenu()
 
@@ -161,7 +190,7 @@ def start():
 			up = TouchPad(Pin(12))
 
 			m.menuloop(up,down,left,right,app,card)
-			machine.restart()
+			machine.reset()
 
 		else:
 			epd.clear_frame(fb)
@@ -184,19 +213,31 @@ def start():
 def buildMenu():
 	import menusys as menu
 	epd.set_rotate(gxgde0213b1.ROTATE_270)
-	m = menu.Menu("Available Applications")
-	print(m)
+	m = menu.Menu("Available Apps")
 
 	#does apps dir exist
 	if not 'apps' in os.listdir():
 		print("Apps Dir is missing, Populating new one")
 		os.mkdir('apps')
 	else:
+			#add static items
+		m.addItem("Change Name",start_web_server_app)
+		m.addItem("Start FTP Server",start_ftp_server_app)
+		m.addItem("Serial REPL",start_repl_app)
 		for a in os.listdir('apps'):
 			m.addItem(a,execapp)
 			print("Adding App '%s'"%a)
-	print(m)
 	return m
+
+def start_repl_app(f):
+	epd.clear_frame(fb)
+	epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font16, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48, "Batteries must be Removed", font16, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48+12, "or machine.reset() must", font16, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48+24, "be sent over serial port", font16, gxgde0213b1.COLORED)
+ 	epd.display_frame(fb)
+	[][0]
 
 def execapp(f):
 	f = "/apps/"+f
@@ -216,3 +257,11 @@ def writeName(first,last,socialmedia='',email=''):
 		fh.close()
 	except:
 		print("Could not Write personal info")
+
+def wait_for_button(b):
+	print("Waiting for press of %s"%b)
+	while b.read()>400:
+		time.sleep(0.1)
+	print("Waiting release of %s"%b)
+	while b.read()<400:
+		time.sleep(0.1)

@@ -26,7 +26,8 @@ class Menu:
 	# Add an item to the menu
 	def addItem(self,text,function):
 		i = {'text':text,'function':function}
-		self.cur_opt = i
+		if self.cur_opt == None:
+			self.cur_opt = i
 		self.menuitems.append(i)
 
 	def handleKey(self,key):
@@ -42,7 +43,17 @@ class Menu:
 		elif key == "launch":
 			if f != None:
 				print("Launching %s"%f)
+				epd.clear_frame(fb)
+				epd.display_string_at(fb, 0, 0, "Launching", font16, gxgde0213b1.COLORED)
+				epd.display_string_at(fb, 0, 16, self.cur_opt['text']+" ..", font16, gxgde0213b1.COLORED)
+				epd.display_frame(fb)
+				time.sleep(1)
 				f(self.cur_opt['text'])
+				epd.clear_frame(fb)
+				epd.display_string_at(fb, 0, 0, "App Finished!", font16, gxgde0213b1.COLORED)
+				epd.display_string_at(fb, 0, 16, self.cur_opt['text']+" ..", font16, gxgde0213b1.COLORED)
+				epd.display_frame(fb)
+				time.sleep(1)
 			else:
 				print("Could not launch '%s' no function attatched!"%self.cur_opt['text'])
 
@@ -76,36 +87,37 @@ class Menu:
 	def menuloop(self,up,down,left,right,run,exit):
 		m = self
 		m.drawMenu()
+		touchdelay = 0.05
 		while True:
 			if up.read()<400:
 				m.handleKey("up")
 				while up.read()<400:
-					pass
+					time.sleep(touchdelay)
 				m.drawMenu()
 			if down.read()<400:
 				m.handleKey("down")
 				while down.read()<400:
-					pass
+					time.sleep(touchdelay)
 				m.drawMenu()
 			if left.read()<400:
 				m.handleKey("left")
 				while left.read()<400:
-					pass
+					time.sleep(touchdelay)
 				m.drawMenu()
 			if right.read()<400:
 				m.handleKey("right")
 				while right.read()<400:
-					pass
+					time.sleep(touchdelay)
 				m.drawMenu()
 			if run.read()<400:
 				m.handleKey("launch")
 				while run.read()<400:
-					pass
+					time.sleep(touchdelay)
 				m.drawMenu()
 			if exit.read()<400:
 				m.handleKey("right")
 				while exit.read()<400:
-					pass
+					time.sleep(touchdelay)
 				return
 		
 		
