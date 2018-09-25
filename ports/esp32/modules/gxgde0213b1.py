@@ -124,6 +124,94 @@ class EPD:
 
 		return 0
 
+	def initPart(self):
+		self.reset()
+
+		# GDOControl
+		self.send_command(0x01)
+		self.send_data(249)
+		self.send_data(0)
+		self.send_data(0x00)
+
+		# softstart
+		self.send_command(0x0c)
+		self.send_data(0xd7)
+		self.send_data(0xd6)
+		self.send_data(0x9d)
+
+		# VCOMVol
+		self.send_command(0x2c)
+		self.send_data(0xa8)
+
+		# DummyLine
+		self.send_command(0x3a)
+		self.send_data(0x1a)
+
+		#Gatetime
+		self.send_command(0x3b)
+		self.send_data(0x08)
+
+		#setRamDataEntryMode
+		self.send_command(0x11)
+		self.send_data(0x01)
+
+		#_SetRamArea	
+		self.send_command(0x44)
+		self.send_data(0x00)
+		self.send_data(0x0f)
+		self.send_command(0x45)
+		self.send_data(249)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+
+		#_SetRamPointer
+		self.send_command(0x4e)
+		self.send_data(0x00)
+		self.send_command(0x4f)
+		self.send_data(249)
+		self.send_data(0x00)
+
+		#LUTDefault_full
+		self.send_command(0x32)
+		self.send_data(0x18)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x0F)
+		self.send_data(0x01)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+		self.send_data(0x00)
+
+		#PowerOn
+		self.send_command(0x22)
+		self.send_data(0xc0)
+		self.send_command(0x20)
+		self.wait_until_idle()
+
+		return 0
+
 	def _spi_transfer(self, data):
 		self.cs_pin.value(0)
 		self.spi.write(data.to_bytes(1,'little'))
