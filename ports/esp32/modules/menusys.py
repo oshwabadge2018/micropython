@@ -96,7 +96,7 @@ class Menu:
 		epd.initPart()
 
 		m.drawMenu()
-		touchdelay = 0.05
+		touchdelay = 0.01
 		touchthres = 800
 		while True:
 			if up.read()<touchthres:
