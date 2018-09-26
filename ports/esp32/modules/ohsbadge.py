@@ -261,8 +261,8 @@ def start_repl_app(f):
 	epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font12, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 48, "Batteries must be Removed", font12, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 48+12, "or machine.reset() must", font12, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 48+24, "be sent over serial port", font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48+12, "or machine.reset() must be sent over", font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48+24, "serial port to reset badge", font12, gxgde0213b1.COLORED)
  	epd.display_frame(fb)
 	[][0]
 
