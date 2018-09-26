@@ -270,7 +270,7 @@ def execapp(f):
 	f = "/apps/"+f
 	print("Running '%s'"%f)
 	try:
-		exec(open(f).read())
+		exec(open(f).read(), globals(), globals())
 	except:
 		pass			
 
