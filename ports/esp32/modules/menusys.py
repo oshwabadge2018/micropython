@@ -43,6 +43,7 @@ class Menu:
 		elif key == "launch":
 			if f != None:
 				print("Launching %s"%f)
+				epd.init()
 				epd.clear_frame(fb)
 				epd.display_string_at(fb, 0, 0, "Launching", font16, gxgde0213b1.COLORED)
 				epd.display_string_at(fb, 0, 16, self.cur_opt['text']+" ..", font16, gxgde0213b1.COLORED)
@@ -54,6 +55,10 @@ class Menu:
 				epd.display_string_at(fb, 0, 16, self.cur_opt['text']+" ..", font16, gxgde0213b1.COLORED)
 				epd.display_frame(fb)
 				time.sleep(1)
+				epd.clear_frame(fb)
+				epd.display_frame(fb)
+				epd.initPart()
+
 			else:
 				print("Could not launch '%s' no function attatched!"%self.cur_opt['text'])
 
@@ -86,6 +91,10 @@ class Menu:
 
 	def menuloop(self,up,down,left,right,run,exit):
 		m = self
+		epd.clear_frame(fb)
+		epd.display_frame(fb)
+		epd.initPart()
+
 		m.drawMenu()
 		touchdelay = 0.05
 		while True:
