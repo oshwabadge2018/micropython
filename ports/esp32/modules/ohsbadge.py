@@ -172,6 +172,33 @@ def start_web_server():
 	srv.Start(threaded=False)
 
 def start():
+	if not 'provisioned' in os.listdir():
+		print("First Boot REPL")
+		#15 27 39 51 63 75 87 99
+		epd.set_rotate(gxgde0213b1.ROTATE_270)
+		epd.clear_frame(fb)
+		epd.display_string_at(fb, 0, 0, "First Boot!", font16, gxgde0213b1.COLORED)
+		epd.display_string_at(fb, 4, 15,      "Badge will drop to REPL", font12, gxgde0213b1.COLORED)
+		epd.display_string_at(fb, 4, 39,   "Configure Via REPL", font12, gxgde0213b1.COLORED)
+		
+		#hw stats
+		adc = machine.ADC(machine.Pin(35))
+		adc.atten(adc.ATTN_11DB)
+		Voltage = (adc.read()/4096)*3.3
+		epd.display_string_at(fb, 4, 63, "Bat V:", font12, gxgde0213b1.COLORED)
+		epd.display_string_at(fb, 60, 63, str(Voltage), font12, gxgde0213b1.COLORED)
+	
+		i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
+		devl = i2c.scan()
+		
+		epd.display_string_at(fb, 4, 75, "i2c:", font12, gxgde0213b1.COLORED)
+		epd.display_string_at(fb, 60, 75, str(devl), font12, gxgde0213b1.COLORED)
+		epd.display_frame(fb)
+		f = open("provisioned","w")
+		f.write("")
+		f.close()
+		return
+		
 	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
 		print(machine.TouchPad.wake_reason())
 		#if machine.TouchPad.wake_reason() == 9:
@@ -219,23 +246,23 @@ def buildMenu():
 	if not 'apps' in os.listdir():
 		print("Apps Dir is missing, Populating new one")
 		os.mkdir('apps')
-	else:
-			#add static items
-		m.addItem("Change Name",start_web_server_app)
-		m.addItem("Start FTP Server",start_ftp_server_app)
-		m.addItem("Serial REPL",start_repl_app)
-		for a in os.listdir('apps'):
-			m.addItem(a,execapp)
-			print("Adding App '%s'"%a)
+
+	#add static items
+	m.addItem("Change Name",start_web_server_app)
+	m.addItem("Start FTP Server",start_ftp_server_app)
+	m.addItem("Serial REPL",start_repl_app)
+	for a in os.listdir('apps'):
+		m.addItem(a,execapp)
+		print("Adding App '%s'"%a)
 	return m
 
 def start_repl_app(f):
 	epd.clear_frame(fb)
 	epd.display_string_at(fb, 0, 0, "OHS 2018", font24, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font16, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 48, "Batteries must be Removed", font16, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 48+12, "or machine.reset() must", font16, gxgde0213b1.COLORED)
-	epd.display_string_at(fb, 0, 48+24, "be sent over serial port", font16, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 24, "Serial REPL Mode", font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48, "Batteries must be Removed", font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48+12, "or machine.reset() must", font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 48+24, "be sent over serial port", font12, gxgde0213b1.COLORED)
  	epd.display_frame(fb)
 	[][0]
 
