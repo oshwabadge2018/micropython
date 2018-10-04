@@ -12,6 +12,7 @@ import machine
 import time
 import os
 import imagedata
+import struct
 
 import machine
 from microWebSrv import MicroWebSrv
@@ -198,8 +199,28 @@ def start():
 		f.write("")
 		f.close()
 		return
-		
-	if machine.wake_reason() == machine.TOUCHPAD_WAKE:
+
+	# i2c bus address of the Kionix KX122-1037 Accelerometer
+	addr = 30
+	i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
+	devl = i2c.scan()
+	print("detected i2c addresses: {0}".format(str(devl)))
+	if addr in devl:
+		print("accelerometer detected: {0}".format(addr))
+		i2c.writeto_mem(addr,0x18,b'\x80')
+		# read X-axis accelerometer output least significant byte
+		acclx = struct.unpack("h",i2c.readfrom_mem(addr,0x6,2))
+		# use only the first element of tuple
+		acclx = acclx[0]
+		print("accelerometer: x={0}".format(acclx))
+
+	# only enter menu if badge is held horizontal or inverted
+	# this will prevent errant cap touch press from taking the
+	# badge out of name display mode while being worn
+	# acclx < 0: badge is hanging from lanyard
+	# acclx = 0: badge is hortizontal
+	# acclx > 0: badge is being held by user
+	if machine.wake_reason() == machine.TOUCHPAD_WAKE and acclx >= 0:
 		print(machine.TouchPad.wake_reason())
 		#if machine.TouchPad.wake_reason() == 9:
 		#	#go into AP mode
