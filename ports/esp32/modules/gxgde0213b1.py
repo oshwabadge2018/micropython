@@ -401,7 +401,7 @@ class EPD:
 				char  = ord(c) - font.first_char
 				w     = font.Glyphs[char][glyph_width]
 				h     = font.Glyphs[char][glyph_height]
-				if w > 0 and h > 0:
+				if w >= 0 and h >= 0:
 					xo    = font.Glyphs[char][glyph_xOffset]
 					yo    = font.Glyphs[char][glyph_yOffset]
 					xa    = font.Glyphs[char][glyph_xAdvance]
