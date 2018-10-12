@@ -13,6 +13,7 @@ import time
 import os
 import imagedata
 import struct
+import time
 
 import machine
 from microWebSrv import MicroWebSrv
@@ -34,6 +35,144 @@ fb_size = int(epd.width * epd.height / 8)
 fb = bytearray(fb_size)
 epd.clear_frame(fb)
 epd.set_rotate(gxgde0213b1.ROTATE_90)
+
+# from Magic 8-Ball app by Steve Pomeroy https://hackaday.io/xxv
+# github.com/oshwabadge2018/ohs18apps/blob/master/magic8ball.py
+class TouchButton(object):
+   def __init__(self, pin, on_pressed, threshold=400, debounce_ms=50):
+       self._touchpad = machine.TouchPad(pin)
+       self._on_pressed = on_pressed
+       self._threshold = threshold
+       self._debounce_ms = debounce_ms
+       self._down_ms = None
+       self._pressed = False
+
+   def read(self):
+       if self._touchpad.read() < self._threshold:
+           if not self._pressed:
+               if not self._down_ms:
+                   self._down_ms = time.ticks_ms()
+               else:
+                   if time.ticks_diff(time.ticks_ms(), self._down_ms) > self._debounce_ms:
+                       self._on_pressed()
+                       self._pressed = True
+       else:
+           self._pressed = False
+           self._down_ms = None
+
+# from Magic 8-Ball app by Steve Pomeroy https://hackaday.io/xxv
+# github.com/oshwabadge2018/ohs18apps/blob/master/magic8ball.py
+class MagicBall():
+   def clear_screen():
+       epd.initPart()
+       epd.clear_frame(fb)
+       epd.display_frame(fb)
+
+   def show_message(message):
+       epd.init()
+       epd.clear_frame(fb)
+       epd.display_string_at(fb, 0, 52, message, font16, gxgde0213b1.COLORED)
+       epd.display_frame(fb)
+
+   def read_accel(i2c):
+       i2c.writeto_mem(30, 0x18, b'\x80')
+       x = struct.unpack("h", i2c.readfrom_mem(30, 0x6, 2))
+       y = struct.unpack("h", i2c.readfrom_mem(30, 0x8, 2))
+       z = struct.unpack("h", i2c.readfrom_mem(30, 0xA, 2))
+       return (x[0], y[0], z[0])
+
+   def get_orientation(i2c):
+       new_orientation = None
+       pos = MagicBall.read_accel(i2c)
+
+       if pos[2] > 13000:
+           new_orientation = "upright"
+       elif pos[2] < -13000:
+           new_orientation = "prone"
+
+       return new_orientation
+
+   def main(f):
+           phrases = ["It is certain.", "It is decidedly so.", "Without a doubt.", "Yes - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful."]
+           i2c = machine.I2C(scl=Pin(22), sda=Pin(21))
+           epd.init()
+           epd.set_rotate(gxgde0213b1.ROTATE_270)
+           epd.clear_frame(fb)
+           epd.display_frame(fb)
+           prev_orientation = None
+
+           keep_on = [True]
+
+           def exit_loop():
+               keep_on[0] = False
+
+           exit_button = TouchButton(Pin(32), exit_loop)
+
+           while keep_on[0]:
+               exit_button.read()
+               orientation = MagicBall.get_orientation(i2c)
+
+               if orientation and orientation != prev_orientation:
+                   if orientation == 'upright':
+                       MagicBall.show_message(urandom.choice(phrases))
+                   elif orientation == 'prone':
+                       MagicBall.clear_screen()
+               prev_orientation = orientation
+
+# from accelerometer demo app
+# github.com/oshwabadge2018/ohs18apps/blob/master/accelerometer.py
+class Accelerometer():
+   def clear_screen():
+       epd.initPart()
+       epd.clear_frame(fb)
+       epd.display_frame(fb)
+
+   def show_message(message):
+       epd.init()
+       epd.clear_frame(fb)
+       epd.display_string_at(fb, 0, 52, message, font16, gxgde0213b1.COLORED)
+       epd.display_frame(fb)
+
+   def read_accel(i2c):
+       i2c.writeto_mem(30, 0x18, b'\x80')
+       x = struct.unpack("h", i2c.readfrom_mem(30, 0x6, 2))
+       y = struct.unpack("h", i2c.readfrom_mem(30, 0x8, 2))
+       z = struct.unpack("h", i2c.readfrom_mem(30, 0xA, 2))
+       return (x[0], y[0], z[0])
+
+   def get_orientation(i2c):
+       pos = Accelerometer.read_accel(i2c)
+       return pos
+
+   def main(f):
+       i2c = machine.I2C(scl=Pin(22), sda=Pin(21))
+       epd.init()
+       epd.set_rotate(gxgde0213b1.ROTATE_270)
+       epd.clear_frame(fb)
+       epd.display_frame(fb)
+       keep_on = [True]
+
+       def exit_loop():
+           keep_on[0] = False
+
+       exit_button = TouchButton(Pin(32), exit_loop)
+
+       while keep_on[0]:
+           exit_button.read()
+           orientation = Accelerometer.get_orientation(i2c)
+           x = "x={0}".format(orientation[0])
+           y = "y={0}".format(orientation[1])
+           z = "z={0}".format(orientation[2])
+           print(x, y, z)
+           epd.clear_frame(fb)
+           epd.set_rotate(gxgde0213b1.ROTATE_270)
+           epd.display_string_at(fb, 10,  0, x, font16, gxgde0213b1.COLORED)
+           epd.display_string_at(fb, 10, 24, y, font16, gxgde0213b1.COLORED)
+           epd.display_string_at(fb, 10, 48, z, font16, gxgde0213b1.COLORED)
+           epd.display_frame(fb)
+           time.sleep(1)
+
+                    
 
 def start_ap_mode():
 	global ipaddress
@@ -272,10 +411,21 @@ def buildMenu():
 	m.addItem("Change Name",start_web_server_app)
 	m.addItem("Start FTP Server",start_ftp_server_app)
 	m.addItem("Serial REPL",start_repl_app)
+	m.addItem("Magic 8-ball",start_magic_app)
+	m.addItem("Accelerometer",start_accel_app)
+
 	for a in os.listdir('apps'):
 		m.addItem(a,execapp)
 		print("Adding App '%s'"%a)
 	return m
+
+def start_magic_app(f):
+    ball = MagicBall()
+    ball.main()
+
+def start_accel_app(f):
+    accel = Accelerometer()
+    accel.main()
 
 def start_repl_app(f):
 	epd.clear_frame(fb)
