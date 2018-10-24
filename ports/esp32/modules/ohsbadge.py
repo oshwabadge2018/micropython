@@ -410,6 +410,7 @@ def buildMenu():
 	#add static items
 	m.addItem("Change Name",start_web_server_app)
 	m.addItem("Start FTP Server",start_ftp_server_app)
+	m.addItem("Web REPL",start_web_repl_app)
 	m.addItem("Serial REPL",start_repl_app)
 	m.addItem("Magic 8-ball",start_magic_app)
 	m.addItem("Accelerometer",start_accel_app)
@@ -436,6 +437,12 @@ def start_repl_app(f):
 	epd.display_string_at(fb, 0, 48+24, "serial port to reset badge", font12, gxgde0213b1.COLORED)
  	epd.display_frame(fb)
 	[][0]
+
+def start_web_repl_app(f):
+	start_ap_mode()
+	import webrepl
+	webrepl.start()
+	wait_for_button(TouchPad(Pin(32)))
 
 def execapp(f):
 	f = "/apps/"+f
