@@ -436,13 +436,22 @@ def start_repl_app(f):
 	epd.display_string_at(fb, 0, 48+12, "or machine.reset() must be sent over", font12, gxgde0213b1.COLORED)
 	epd.display_string_at(fb, 0, 48+24, "serial port to reset badge", font12, gxgde0213b1.COLORED)
  	epd.display_frame(fb)
+	# this is a hack to drop to the REPL
+	# by creating a runtime error
 	[][0]
 
 def start_web_repl_app(f):
 	start_ap_mode()
 	import webrepl
 	webrepl.start()
-	wait_for_button(TouchPad(Pin(32)))
+	epd.display_string_at(fb, 0, 60, "Download WebREPL client from:" , font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 72, "github.com/micropython/webrepl" , font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 88, "To exit WebREPL, remove batteries", font12, gxgde0213b1.COLORED)
+	epd.display_string_at(fb, 0, 100, "or type machine.reset()", font12, gxgde0213b1.COLORED)
+	epd.display_frame(fb)
+	# this is a hack to drop to the REPL
+	# by creating a runtime error
+	[][0]
 
 def execapp(f):
 	f = "/apps/"+f
