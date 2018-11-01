@@ -119,6 +119,69 @@ class MagicBall():
                        MagicBall.clear_screen()
                prev_orientation = orientation
 
+
+class Pumpkin():
+	def main(f):
+		print("PUMPKIN!")
+		try:
+			import d_name
+			print("Printing Name")
+			namestr=d_name.first+"\n"+d_name.last
+			epd.set_rotate(gxgde0213b1.ROTATE_90)
+			epd.clear_frame(fb)
+			epd.G_display_string_at(fb,0,0,namestr,G_FreeSans24pt7b,1,gxgde0213b1.COLORED)
+			epd.display_frame(fb)
+		except:
+			print("No Name, Showing Logo")
+			epd.display_frame(imagedata.ohslogo)
+		i2c = machine.I2C(scl=Pin(22), sda=Pin(21))
+		print(i2c)
+		import ht16k33_matrix
+		# http://github.com/adafruit/micropython-adafruit-ht16k33
+		# commit a05994a814d3d13a66a8a4d9fbf9a673742cb578
+		matrix = ht16k33_matrix.Matrix8x8x2(i2c)
+		print(matrix)
+		#matrix.buffer = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF')
+		image = (
+			0b01111110, #8
+			0b11111111, #7
+			0b11100111, #6
+			0b11011011, #5
+			0b11111111, #4
+			0b11011011, #3
+			0b11111111, #2
+			0b01111110, #1
+		)
+		image2 = (
+			0b00000000, #8
+			0b00000000, #7
+			0b00000000, #6
+			0b00000000, #5
+			0b00000000, #4
+			0b00100100, #3
+			0b00000000, #2
+			0b00000000, #1
+		)
+
+		# TODO: allow user to exit animation
+		while True:
+			print("draw pumpkin!")
+			# TODO: make this a function
+			for y, line in enumerate(image):
+				for x in range(8):
+					if line & (1 << x):
+						matrix.pixel(x, y, 3)
+					else:
+						matrix.pixel(x, y, 0)
+			matrix.show()
+			time.sleep(2)
+			for y, line in enumerate(image2):
+				for x in range(8):
+					if line & (1 << x):
+						matrix.pixel(x, y, 2)
+			matrix.show()
+			time.sleep(0.5)
+
 # from accelerometer demo app
 # github.com/oshwabadge2018/ohs18apps/blob/master/accelerometer.py
 class Accelerometer():
@@ -155,7 +218,6 @@ class Accelerometer():
        def exit_loop():
            keep_on[0] = False
 
-       exit_button = TouchButton(Pin(32), exit_loop)
 
        while keep_on[0]:
            exit_button.read()
@@ -353,6 +415,7 @@ def start():
 		acclx = acclx[0]
 		print("accelerometer: x={0}".format(acclx))
 
+
 	# only enter menu if badge is held horizontal or inverted
 	# this will prevent errant cap touch press from taking the
 	# badge out of name display mode while being worn
@@ -408,6 +471,7 @@ def buildMenu():
 		os.mkdir('apps')
 
 	#add static items
+	m.addItem("Pumpkin!",start_pumpkin_app)
 	m.addItem("Change Name",start_web_server_app)
 	m.addItem("Start FTP Server",start_ftp_server_app)
 	m.addItem("Web REPL",start_web_repl_app)
@@ -419,6 +483,10 @@ def buildMenu():
 		m.addItem(a,execapp)
 		print("Adding App '%s'"%a)
 	return m
+
+def start_pumpkin_app(f):
+    pumpkin = Pumpkin()
+    pumpkin.main()
 
 def start_magic_app(f):
     ball = MagicBall()
